@@ -4,18 +4,12 @@ DIR="./"
 MATCH="*.jpg"
 FEH=0
 
-declare -f show_metadata
-
 function usage() {
     echo "usage: $0 [options [arg] ]"
     echo -e "\t-h display this help"
     echo -e "\t-x viewing with feh"
     echo -e "\t-p change default path (./)"
     echo -e "\t-x change default match (\"*.jpg\")"
-}
-
-function show_metadata() {
-    echo "salut"
 }
 
 function find_pics() {
