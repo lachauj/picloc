@@ -32,8 +32,8 @@ function find_pics() {
 			echo "Address: $address"
 			echo -e "Maps url: https://www.google.fr/maps/preview#!q=$ll\n"
 
-			if [ $FEH ]; then
-			        feh --info "curl \"http://maps.googleapis.com/maps/api/geocode/json?latlng=${ll}&sensor=false\" 2>/dev/null | grep -i \"formatted_address\" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ \"//' -e 's/\",//' -e 's/,\ /,/g' | tr ',' '\n'" "${str}"
+			if [ $FEH == 1 ]; then
+			        feh --info "curl \"http://maps.googleapis.com/maps/api/geocode/json?latlng=${ll}&sensor=false\" 2>/dev/null | grep -i \"formatted_address\" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ \"//' -e 's/\",//' -e 's/,\ /,/g' | tr ',' '\n'" "${str}" 2>/dev/null
 				fi
 			    fi
 		    done
