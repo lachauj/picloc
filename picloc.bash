@@ -23,9 +23,9 @@ function find_pics() {
 		ll=$(echo "$GPS" | cut -d ':' -f2 | sed -e 's/\ //' -e 's/\ /%2C/')
 		address=$(curl "http://maps.googleapis.com/maps/api/geocode/json?latlng=${ll}&sensor=false" 2>/dev/null | grep -i "formatted_address" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ "//' -e 's/",//')
 		
-		echo "File: file://$str_encode" 
-		echo "Address: $address"
-		echo -e "Maps url: https://www.google.fr/maps/preview#!q=$ll\n"
+		echo "[*] file: file://$str_encode" 
+		echo "[*] address: $address"
+		echo -e "[*] maps url: https://www.google.fr/maps/preview#!q=$ll\n"
 		
 		if [ $FEH == 1 ]; then
 		    feh --info "curl \"http://maps.googleapis.com/maps/api/geocode/json?latlng=${ll}&sensor=false\" 2>/dev/null | grep -i \"formatted_address\" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ \"//' -e 's/\",//' -e 's/,\ /,/g' | tr ',' '\n'" "${str}" 2>/dev/null
@@ -63,6 +63,8 @@ function main() {
     done
 
     export PATH="$PATH:/usr/bin/vendor_perl/"
+
+    exiftool &>/dev/null && test $? != 0 && echo "[*] exiftool is missing !" && exit 1
 
     find_pics
 }
