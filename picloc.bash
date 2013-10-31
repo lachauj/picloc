@@ -63,11 +63,8 @@ function main() {
     done
 
     export PATH="$PATH:/usr/bin/vendor_perl/"
-
-    exiftool &>/dev/null 
-    
+    exiftool &>/dev/null
     test $? != 0 && echo "[*] exiftool is missing !" && exit 1
-
     find_pics
 }
 
