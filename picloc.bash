@@ -9,36 +9,52 @@ function usage() {
     echo "usage: $0 [options [arg] ]"
     echo -e "\t-h display this help"
     echo -e "\t-x viewing with feh"
-    echo -e "\t-c convert the image with location annotation"
-    echo -e "\t-p change default path (./)"
-    echo -e "\t-x change default match (\"*.jpg\")"
+    echo -e "\t-c convert the image with a location annotation"
+    echo -e "\t-p <path> change default path (./)"
+    echo -e "\t-m <match> change default match (\"*.jpg\")"
+}
+
+function gps_position() {
+    gps=$( exiftool -n -c "%.6f degrees" "$1" | grep -i "gps position" ) 
+    echo "$gps" | cut -d ':' -f2 | sed -e 's/\ //' -e 's/\ /%2C/'
+}
+
+function starting_feh() {
+    if [ $FEH == 1 ]; then
+	echo "[*] starting feh…"
+	feh -F --info "curl \"http://maps.googleapis.com/maps/api/geocode/json?latlng=$1&sensor=false\" 2>/dev/null | grep -i \"formatted_address\" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ \"//' -e 's/\",//' -e 's/,\ /,/g' | tr ',' '\n'" "$2" 2>/dev/null
+    fi
+}
+
+function converting_file() {
+    cfile=$(readlink -f "$1" | sed -e 's/\ /%20/g')
+    echo "[*] file: file://${cfile}" 
+    cfile=$(echo "${cfile}" | sed -e 's/\(\.[A-Za-z]\{0,8\}$\)/-gps\1/')
+    if [ $CONVERT == 1 ]; then
+	convert "$1" -gravity NorthWest -annotate 0 "$(echo $address | sed -e 's/,\ /,/g' | tr ',' '\n')" "${cfile}"
+	echo "[*] converted file: file://${cfile}"
+    fi
+}
+
+function get_location() {
+    address=$(curl "http://maps.googleapis.com/maps/api/geocode/json?latlng=${ll}&sensor=false" 2>/dev/null | grep -i "formatted_address" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ "//' -e 's/",//')
+    echo "[*] address: $address"
+    echo "[*] maps url: https://www.google.fr/maps/preview#!q=${ll}"
 }
 
 function find_pics() {
 
     find "$DIR" -iname "$MATCH" | {
-	while read str;
+	while read file;
 	do
-	    GPS=$( exiftool -n -c "%.6f degrees" "$str" | grep -i "gps position" ) 
-	    if [ "$GPS" != "" ]; then
-		str_encode=$(echo $str | sed -e 's/\ /%20/g')
-		ll=$(echo "$GPS" | cut -d ':' -f2 | sed -e 's/\ //' -e 's/\ /%2C/')
-		address=$(curl "http://maps.googleapis.com/maps/api/geocode/json?latlng=${ll}&sensor=false" 2>/dev/null | grep -i "formatted_address" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ "//' -e 's/",//')
-		
-		echo "[*] file: file://$str_encode" 
-		echo "[*] address: $address"
-		echo -e "[*] maps url: https://www.google.fr/maps/preview#!q=$ll\n"
-		
-		if [ $FEH == 1 ]; then
-		    feh --info "curl \"http://maps.googleapis.com/maps/api/geocode/json?latlng=${ll}&sensor=false\" 2>/dev/null | grep -i \"formatted_address\" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ \"//' -e 's/\",//' -e 's/,\ /,/g' | tr ',' '\n'" "${str}" 2>/dev/null
-		fi
-
-		if [ $CONVERT == 1 ]; then
-		    convert "${str}" -gravity NorthWest -annotate 0 "$(echo $address | sed -e 's/,\ /,/g' | tr ',' '\n')"  $(basename "${str}" | sed -e 's/\(\.[A-Za-z]\{0,8\}$\)/-gps\1/')
-		fi
+	    ll=$(gps_position "${file}")
+	    if [ "$ll" != "" ]; then
+		converting_file "${file}"
+		get_location "${ll}"
+		starting_feh "${ll}" "${file}"
+		echo 
+		sleep 1
 	    fi
-	    
-	    sleep 1
 	done
     }
 }
