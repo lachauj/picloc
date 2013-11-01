@@ -14,9 +14,26 @@ function usage() {
     echo -e "\t-m <match> change default match (\"*.jpg\")"
 }
 
+function gps_deg_to_dec() {
+    gps=$(identify -format "%[EXIF:*GPS*]" "$1" | grep -i "$2"= | cut -d '=' -f2 | sed -e 's/,/\ \+/' | sed -e 's/,/\ \* 1\/60\ \+ 1\/60\ \*\ 1\/60\ \*/')
+    coeff=$(identify -format "%[EXIF:*GPS*]" "$1" | grep -i "$2"ref= | cut -d '=' -f2 | sed -e 's/[W|w|S|s]/\-1/' -e 's/[N|n|E|e]/1/')
+
+    test "$gps" == "" && return 1
+
+    echo "scale=10; (${gps}) * ${coeff}"  | bc
+
+    return 0
+}
+
 function gps_position() {
-    gps=$( exiftool -n -c "%.6f degrees" "$1" | grep -i "gps position" ) 
-    echo "$gps" | cut -d ':' -f2 | sed -e 's/\ //' -e 's/\ /%2C/'
+    gpsLat=$(gps_deg_to_dec "$1" "latitude")
+    gpsLon=$(gps_deg_to_dec "$1" "longitude")
+
+    test $? == 1 && return 1
+
+    echo "${gpsLat}%2C${gpsLon}"
+
+    return 0
 }
 
 function starting_feh() {
@@ -48,7 +65,7 @@ function find_pics() {
 	while read file;
 	do
 	    ll=$(gps_position "${file}")
-	    if [ "$ll" != "" ]; then
+	    if [ $? == 0 ]; then
 		converting_file "${file}"
 		get_location "${ll}"
 		starting_feh "${ll}" "${file}"
@@ -61,7 +78,7 @@ function find_pics() {
 
 function main() {
 
-    while getopts .xchp:m:. OPTION
+    while getopts xchp:m: OPTION
     do
         case $OPTION in
             h)
@@ -87,9 +104,6 @@ function main() {
             esac
     done
 
-    export PATH="$PATH:/usr/bin/vendor_perl/"
-    exiftool &>/dev/null
-    test $? != 0 && echo "[*] exiftool is missing !" && exit 1
     find_pics
 }
 
