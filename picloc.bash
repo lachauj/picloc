@@ -38,7 +38,6 @@ function gps_position() {
 
 function starting_feh() {
     if [ $FEH == 1 ]; then
-	echo "[*] starting feh…"
 	feh -F --info "curl \"http://maps.googleapis.com/maps/api/geocode/json?latlng=$1&sensor=false\" 2>/dev/null | grep -i \"formatted_address\" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ \"//' -e 's/\",//' -e 's/,\ /,/g' | tr ',' '\n'" "$2" 2>/dev/null
     fi
 }
