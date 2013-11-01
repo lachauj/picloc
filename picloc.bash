@@ -4,12 +4,14 @@ DIR="./"
 MATCH="*.jpg"
 FEH=0
 SLIDESHOW=0
+DIRECT=0
 LOG_FILE=/tmp/pictures-infos-gps.log
 CONVERT=0
 
 function usage() {
     echo "usage: $0 [options [arg] ]"
     echo -e "\t-c convert the image with a location annotation"
+    echo -e "\t-d desactivate pictures research (based on an old log file)"
     echo -e "\t-f <file> change default log file ($LOG_FILE)"
     echo -e "\t-h display this help"
     echo -e "\t-m <match> change default match (\"*.jpg\")"
@@ -27,7 +29,7 @@ function print_backspace()  {
 }
 
 function gps_deg_to_dec() {
-    gps=$(identify -format "%[EXIF:*GPS*]" "$1")
+    gps=$(identify -format "%[EXIF:*GPS*]" "$1" 2>/dev/null)
     gps=$(echo "$gps" | grep -i "$2"= | cut -d '=' -f2 | sed -e 's/,/\ \+/' | sed -e 's/,/\ \* 1\/60\ \+ 1\/60\ \*\ 1\/60\ \*/')
     test "$gps" == "" && return 1
     coeff=$(identify -format "%[EXIF:*GPS*]" "$1" | grep -i "$2"ref= | cut -d '=' -f2 | sed -e 's/[W|w|S|s]/\-1/' -e 's/[N|n|E|e]/1/')
@@ -67,6 +69,11 @@ function get_location() {
     echo "[*] maps url: https://www.google.fr/maps/preview#!q=$1"
 }
 
+function parse_pics_found() {
+    files=$(cat $LOG_FILE | grep -i file | cut -d ':' -f3 | sed -e 's/%20/\\ /g' | tr '\n' ' ')
+    eval "starting_feh ${files}"
+}
+
 function find_pics() {
 
     declare -a files
@@ -95,14 +102,11 @@ function find_pics() {
 
     echo "100% found: $i"
     echo "[*] log file created"
-    files=$(cat $LOG_FILE | grep -i file | cut -d ':' -f3 | sed -e 's/%20/\\ /g' | tr '\n' ' ')
-
-    eval "starting_feh ${files}"
 }
 
 function main() {
 
-    while getopts xchp:m:s:f: OPTION
+    while getopts xcdhp:m:s:f: OPTION
     do
         case $OPTION in
             h)
@@ -114,6 +118,9 @@ function main() {
                 ;;
             c)
                 CONVERT=1
+                ;;
+            d)
+		DIRECT=1
                 ;;
             p)
 		DIR=$OPTARG
@@ -134,9 +141,12 @@ function main() {
             esac
     done
 
-    test -f $LOG_FILE && rm $LOG_FILE
-
-    find_pics
+    if [ $DIRECT == 1 ]; then
+	parse_pics_found
+    else
+	test -f $LOG_FILE && rm $LOG_FILE
+	find_pics
+    fi
 }
 
 main "${@}"
