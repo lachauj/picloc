@@ -28,11 +28,10 @@ function print_backspace()  {
 
 function gps_deg_to_dec() {
     gps=$(identify -format "%[EXIF:*GPS*]" "$1")
-    test "$gps" == "" && return 1
     gps=$(echo "$gps" | grep -i "$2"= | cut -d '=' -f2 | sed -e 's/,/\ \+/' | sed -e 's/,/\ \* 1\/60\ \+ 1\/60\ \*\ 1\/60\ \*/')
+    test "$gps" == "" && return 1
     coeff=$(identify -format "%[EXIF:*GPS*]" "$1" | grep -i "$2"ref= | cut -d '=' -f2 | sed -e 's/[W|w|S|s]/\-1/' -e 's/[N|n|E|e]/1/')
     echo "scale=10; (${gps}) * ${coeff}"  | bc
-
     return 0
 }
 
@@ -80,7 +79,7 @@ function find_pics() {
 
     for ((found=0, i=0; i < ${#files[@]}; ++i))
     do
-	percent=$(echo "($i * 100) / ${nbfiles}" | bc)
+	percent=$(echo "scale=2; ($i * 100) / ${nbfiles}" | bc)
 	file=$(echo ${files[$i]} | sed -e 's/%20/\ /g')
 	ll=$(gps_position "${file}")
 	if [ $? == 0 ]; then
