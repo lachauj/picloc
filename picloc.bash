@@ -11,7 +11,7 @@ CONVERT=0
 function usage() {
     echo "usage: $0 [options [arg] ]"
     echo -e "\t-c convert the image with a location annotation"
-    echo -e "\t-d desactivate pictures research (based on an old log file)"
+    echo -e "\t-d desactivate pictures research (based on an old log file, required -x)"
     echo -e "\t-f <file> change default log file ($LOG_FILE)"
     echo -e "\t-h display this help"
     echo -e "\t-m <match> change default match (\"*.jpg\")"
@@ -142,6 +142,7 @@ function main() {
     done
 
     if [ $DIRECT == 1 ]; then
+	echo "[*] started in direct mode"
 	test ! -f $LOG_FILE && echo "[*] $LOG_FILE is missing !" && exit 1 
 	parse_pics_found
     else
