@@ -16,7 +16,7 @@ Finds all pictures with gps metadata in *~/Private/pics/*, displays them with a 
 Displays all pictures based on an log file:
 `./picloc.bash -d -f /tmp/file.log (if -f is missing, the default log file will be taken)`
 
-Converts all pictures found (a copy named <basename>-gps.<extension> is created):<br>
+Converts all pictures found (a copy named *basename*-gps.*extension* is created):<br>
 `./picloc.bash -c -p ~/Private/pics/`
 
 Help display `./picloc.bash -h`:
