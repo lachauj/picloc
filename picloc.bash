@@ -142,6 +142,7 @@ function main() {
     done
 
     if [ $DIRECT == 1 ]; then
+	test ! -f $LOG_FILE && echo "[*] $LOG_FILE is missing !" && exit 1 
 	parse_pics_found
     else
 	test -f $LOG_FILE && rm $LOG_FILE
