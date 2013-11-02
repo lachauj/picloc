@@ -30,7 +30,7 @@ function print_backspace()  {
 
 function gps_deg_to_dec() {
     gps=$(identify -format "%[EXIF:*GPS*]" "$1" 2>/dev/null)
-    gps=$(echo "$gps" | grep -i "$2"= | cut -d '=' -f2 | sed -e 's/,/\ \+/' | sed -e 's/,/\ \* 1\/60\ \+ 1\/60\ \*\ 1\/60\ \*/')
+    gps=$(echo "$gps" | grep -i "$2"= | cut -d '=' -f2 | sed -e 's/,/\ \+/' -e 's/,/\ \* 1\/60\ \+ 1\/60\ \*\ 1\/60\ \*/')
     test "$gps" == "" && return 1
     coeff=$(identify -format "%[EXIF:*GPS*]" "$1" | grep -i "$2"ref= | cut -d '=' -f2 | sed -e 's/[W|w|S|s]/\-1/' -e 's/[N|n|E|e]/1/')
     echo "scale=10; (${gps}) * ${coeff}"  | bc
@@ -106,12 +106,12 @@ function find_pics() {
 	    echo >> $LOG_FILE
 	    found=$(( found + 1 ))
 	fi
-	infos=$(echo -n "${percent}% found: ${found}")
+	infos="${percent}% found: ${found}"
 	echo -n $infos
-	print_backspace $(echo -n $infos | wc -c) 
+	print_backspace ${#infos}
     done 
 
-    echo "100% found: ${found}"
+    echo "100% found: ${found}   "
     tput cnorm
     echo "[*] log file created"
 }
