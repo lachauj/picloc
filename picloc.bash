@@ -94,7 +94,7 @@ function find_pics() {
 
     tput civis
 
-    for ((found=0, i=0; i < ${#files[@]}; ++i))
+    for ((found=0, i=0; i < ${nbfiles}; ++i))
     do
 	percent=$(echo "scale=2; ($i * 100) / ${nbfiles}" | bc)
 	file=$(echo ${files[$i]} | sed -e 's/%20/\ /g')
