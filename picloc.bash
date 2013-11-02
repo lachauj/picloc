@@ -92,6 +92,8 @@ function find_pics() {
 
     echo -n "[*] completed: "
 
+    tput civis
+
     for ((found=0, i=0; i < ${#files[@]}; ++i))
     do
 	percent=$(echo "scale=2; ($i * 100) / ${nbfiles}" | bc)
@@ -109,7 +111,8 @@ function find_pics() {
 	print_backspace $(echo -n $infos | wc -c) 
     done 
 
-    echo "100% found: $i"
+    echo "100% found: ${found}"
+    tput cnorm
     echo "[*] log file created"
 }
 
