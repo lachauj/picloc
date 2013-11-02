@@ -113,7 +113,7 @@ function find_pics() {
 
     echo "100% found: ${found}   "
     tput cnorm
-    echo "[*] log file created"
+    echo "[*] log file created to ${LOG_FILE}"
 }
 
 function main() {
