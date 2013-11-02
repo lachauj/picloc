@@ -53,19 +53,28 @@ function starting_feh() {
     fi
 }
 
+function url_encode_file() {
+    local __cfile=$2
+    local tmp="$(readlink -f "$1" | sed -e 's/\ /%20/g')"
+    eval $__cfile="${tmp}"
+    echo "[*] file: file://${tmp}" 
+}
+
 function converting_file() {
-    cfile=$(readlink -f "$1" | sed -e 's/\ /%20/g')
-    echo "[*] file: file://${cfile}" 
     if [ $CONVERT == 1 ]; then
+	cfile="$1"
+	address="$2"
 	cfile=$(echo "${cfile}" | sed -e 's/\(\.[A-Za-z]\{0,8\}$\)/-gps\1/')
-	convert "$1" -gravity NorthWest -annotate 0 "$(echo $address | sed -e 's/,\ /,/g' | tr ',' '\n')" "${cfile}"
+	convert "$1" -gravity NorthWest -annotate 0 "$(echo ${address} | sed -e 's/,\ /,/g' | tr ',' '\n')" "${cfile}"
 	echo "[*] converted file: file://${cfile}"
     fi
 }
 
 function get_location() {
-    address=$(curl "http://maps.googleapis.com/maps/api/geocode/json?latlng=$1&sensor=false" 2>/dev/null | grep -i "formatted_address" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ "//' -e 's/",//')
-    echo "[*] address: $address"
+    local __address=$2
+    local tmp="$(curl "http://maps.googleapis.com/maps/api/geocode/json?latlng=$1&sensor=false" 2>/dev/null | grep -i "formatted_address" | head -n 1 | cut -d ':' -f2 | sed -e 's/\ "//' -e 's/",//')"
+    eval $__address=\"${tmp}\"
+    echo "[*] address: ${tmp}"
     echo "[*] maps url: https://www.google.fr/maps/preview#!q=$1"
 }
 
@@ -77,7 +86,6 @@ function parse_pics_found() {
 function find_pics() {
 
     declare -a files
-    declare -a found
 
     files=( $(find "$DIR" -iname "$MATCH" | sed -e 's/\ /%20/g') )
     nbfiles=${#files[@]}
@@ -90,8 +98,9 @@ function find_pics() {
 	file=$(echo ${files[$i]} | sed -e 's/%20/\ /g')
 	ll=$(gps_position "${file}")
 	if [ $? == 0 ]; then
-	    converting_file "${file}" >> $LOG_FILE
-	    get_location "${ll}" >> $LOG_FILE
+	    url_encode_file "${file}" efile >> $LOG_FILE
+	    get_location "${ll}" address >> $LOG_FILE
+	    converting_file "${efile}" "${address}" >> $LOG_FILE
 	    echo >> $LOG_FILE
 	    found=$(( found + 1 ))
 	fi
@@ -142,13 +151,14 @@ function main() {
     done
 
     if [ $DIRECT == 1 ]; then
+	test $FEH == 0 && echo "[*] direct mode required -x option" && exit 1
 	echo "[*] started in direct mode"
 	test ! -f $LOG_FILE && echo "[*] $LOG_FILE is missing !" && exit 1 
-	parse_pics_found
     else
 	test -f $LOG_FILE && rm $LOG_FILE
 	find_pics
     fi
+    parse_pics_found
 }
 
 main "${@}"
