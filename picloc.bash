@@ -56,8 +56,8 @@ function starting_feh() {
 function converting_file() {
     cfile=$(readlink -f "$1" | sed -e 's/\ /%20/g')
     echo "[*] file: file://${cfile}" 
-    cfile=$(echo "${cfile}" | sed -e 's/\(\.[A-Za-z]\{0,8\}$\)/-gps\1/')
     if [ $CONVERT == 1 ]; then
+	cfile=$(echo "${cfile}" | sed -e 's/\(\.[A-Za-z]\{0,8\}$\)/-gps\1/')
 	convert "$1" -gravity NorthWest -annotate 0 "$(echo $address | sed -e 's/,\ /,/g' | tr ',' '\n')" "${cfile}"
 	echo "[*] converted file: file://${cfile}"
     fi
@@ -137,7 +137,7 @@ function main() {
             ?)
                 usage
                 exit 1
-                ;;
+		;;
             esac
     done
 
