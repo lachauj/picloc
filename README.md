@@ -10,13 +10,13 @@ PICLOC (PICtures LOCation) is a pictures researcher to locate EXIF photos with G
 </ul>
 ### Usage example:<br>
 
-Finds all the pictures with gps metadata in *~/Private/pics/*, display them with a slideshow of 3sec:
+Finds all pictures with gps metadata in *~/Private/pics/*, displays them with a slideshow of 3sec:
 `./picloc.bash -p ~/Private/pics/ -x -s 3`
 
-Displays all the pictures based on an log file:
+Displays all pictures based on an log file:
 `./picloc.bash -d -f /tmp/file.log (if -f is missing, the default log file will be taken)`
 
-Converts all the pictures found (a copy named <basename>-gps.<extension> is created):<br>
+Converts all pictures found (a copy named <basename>-gps.<extension> is created):<br>
 `./picloc.bash -c -p ~/Private/pics/`
 
 Help display `./picloc.bash -h`:
