@@ -21,11 +21,7 @@ function usage() {
 }
 
 function print_backspace()  {
-
-    for ((j=0; j < $1; ++j))
-    do
-	echo -n -e "\b"
-    done
+    eval printf '\\b%.0s' {1..$1}
 }
 
 function gps_deg_to_dec() {
@@ -79,6 +75,8 @@ function get_location() {
 }
 
 function parse_pics_found() {
+    test ! -f $LOG_FILE && return 1
+
     files=$(cat $LOG_FILE | grep -i file | cut -d ':' -f3 | sed -e 's/%20/\\ /g' | tr '\n' ' ')
     eval "starting_feh ${files}"
 }
